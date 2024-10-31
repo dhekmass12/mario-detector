@@ -1,0 +1,8 @@
+__pycache__/
+.vscode/
+input/
+original/
+output/
+point_maps/
+.DS_Store
+notes.md
