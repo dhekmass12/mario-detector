@@ -18,22 +18,19 @@ def processVideo(directory, interactive=False):
 
     img_dir = util.INPUT_PATH + "mario.png"
     video_dir = util.INPUT_PATH + "mario.mp4"
-    cap = cv2.VideoCapture(video_dir)
-    ret, frame = cap.read()
     # TODO: only rotate when the image is incorrect
     # frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     img = cv2.imread(img_dir)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    cap = cv2.VideoCapture(video_dir)
+    ret, frame = cap.read()
+    gray2 = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     
     i = 0
     while(cap.isOpened()):
         print(f'\x1b[2K\r└──> Frame {i + 1}', end='')
 
-        point_map, inliers, homography = imageAnalysis.main(frame, img,
-                                                            i, verbose=False)
-        
-        output = util.drawInliersOutliers(frame, point_map, inliers)        
+        output = imageAnalysis.main(img, frame, gray1, gray2, i, verbose=False)     
         cv2.imwrite(util.FRAMES_PATH + str(i) + '.png', output)
 
         if interactive:
@@ -41,7 +38,7 @@ def processVideo(directory, interactive=False):
 
         ret, frame = cap.read()
         if not ret: break
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray2 = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -69,11 +66,9 @@ if __name__ == '__main__':
     
     util.INPUT_PATH += f'videos/{args.directory}/'
     util.OUTPUT_PATH += f'videos/{args.directory}/{datetime.now().strftime("%Y-%m-%d-%H%M")}/'
-    util.POINT_MAPS_PATH += f'videos/{args.directory}/'
     util.FRAMES_PATH = util.OUTPUT_PATH + util.FRAMES_PATH
 
     os.makedirs(util.OUTPUT_PATH, exist_ok=True)
-    os.makedirs(util.POINT_MAPS_PATH, exist_ok=True)
     os.makedirs(util.FRAMES_PATH, exist_ok=True)
 
     processVideo(args.directory)

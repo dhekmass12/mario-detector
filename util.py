@@ -3,7 +3,6 @@ import numpy as np
 
 INPUT_PATH = 'input/'
 OUTPUT_PATH = 'output/'
-POINT_MAPS_PATH = 'point_maps/'
 FRAMES_PATH = 'frames/'
 
 BLUE = (255, 0, 0)
