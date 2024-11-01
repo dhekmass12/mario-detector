@@ -1,4 +1,4 @@
-## Preparation
+## Prerequisites
 * [Python >= 3.7.9](https://www.python.org/downloads/release/python-379/)
 * [OpenCV](https://opencv.org)
 * [NumPy](https://numpy.org)
