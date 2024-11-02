@@ -6,6 +6,8 @@
 
 ## Preparation
 Store the query image and target image in folder: input/videos/<folder_name>
+Query image name: mario.png
+Target image name: mario.mp4
 
 ## Usage
 ```sh
@@ -17,4 +19,4 @@ python videoAnalysis.py -d 1
 ```
 
 ## Return
-The outputs saved in folder: output/
+The outputs will be saved automatically in the folder: output/
