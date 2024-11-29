@@ -21,16 +21,14 @@ def processVideo(directory, interactive=False):
     # TODO: only rotate when the image is incorrect
     # frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
     img = cv2.imread(img_dir)
-    gray1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     cap = cv2.VideoCapture(video_dir)
     ret, frame = cap.read()
-    gray2 = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     
     i = 0
     while(cap.isOpened()):
         print(f'\x1b[2K\r└──> Frame {i + 1}', end='')
 
-        output = imageAnalysis.main(img, frame, gray1, gray2, i, verbose=False)     
+        output = imageAnalysis.main(img, frame, i, verbose=False)     
         cv2.imwrite(util.FRAMES_PATH + str(i) + '.png', output)
 
         if interactive:
