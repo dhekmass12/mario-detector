@@ -39,36 +39,27 @@ def main(image1, image2, directory, verbose=True):
         except:
             return image2
             
-        h,w = image1.shape[:2]
-        pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
-        dst = cv2.perspectiveTransform(pts,M)
-        ## draw found regions
-        image2 = cv2.polylines(image2, [np.int32(dst)], True, (0, 255, 0), 1, cv2.LINE_AA)
-
-        x_min = w-1
-        x_max = 0
-        y_min = h-1
-        y_max = 0
-        for ele in dst_pts:
-            ele = ele[0]
-            x = ele[0]
-            y = ele[1]
-            x_min = min(x_min, x)
-            x_max = max(x_max, x)
-            y_min = min(y_min, y)
-            y_max = max(y_max, y)
             
-        # roi_corners = np.array([[(100,100),(100, 800),(800, 800),(800, 100)]],dtype = np.int32)
-        # blurred_image = cv2.blur(image2_copy, (100, 100))
-        # mask = np.zeros(image2_copy.shape, dtype=np.uint8)
-        # channel_count = image2_copy.shape[2]
-        # ignore_mask_color = (255,)*channel_count
-        cv2.fillPoly(image2_copy, [np.int32(dst)], (180, 177, 171))
-        # mask_inverse = np.ones(mask.shape).astype(np.uint8)*255 - mask
-        # image2_copy = cv2.bitwise_and(blurred_image, mask) + cv2.bitwise_and(image2_copy, mask_inverse)
-        
-        ## draw match lines
-        # res = cv2.drawMatches(image1, kpts1, image2, kpts2, dmatches[:20],None,flags=2)
+        try:
+            h,w = image1.shape[:2]
+            pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
+            dst = cv2.perspectiveTransform(pts,M)
+            ## draw found regions
+            image2 = cv2.polylines(image2, [np.int32(dst)], True, (0, 255, 0), 4, cv2.LINE_AA)
+                
+            # roi_corners = np.array([[(100,100),(100, 800),(800, 800),(800, 100)]],dtype = np.int32)
+            # blurred_image = cv2.blur(image2_copy, (100, 100))
+            # mask = np.zeros(image2_copy.shape, dtype=np.uint8)
+            # channel_count = image2_copy.shape[2]
+            # ignore_mask_color = (255,)*channel_count
+            cv2.fillPoly(image2_copy, [np.int32(dst)], (180, 177, 171))
+            # mask_inverse = np.ones(mask.shape).astype(np.uint8)*255 - mask
+            # image2_copy = cv2.bitwise_and(blurred_image, mask) + cv2.bitwise_and(image2_copy, mask_inverse)
+            
+            ## draw match lines
+            # res = cv2.drawMatches(image1, kpts1, image2, kpts2, dmatches[:20],None,flags=2)
+        except:
+            pass
         
         LIMIT -= 1
         
