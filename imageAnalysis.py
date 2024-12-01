@@ -13,7 +13,7 @@ def main(image1, image2, directory, verbose=True):
     image2_copy = image2.copy()
     gray1 = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)
     
-    LIMIT = 3
+    LIMIT = 5
     while (LIMIT > 0):
         gray2 = cv2.cvtColor(image2_copy, cv2.COLOR_BGR2GRAY)
         

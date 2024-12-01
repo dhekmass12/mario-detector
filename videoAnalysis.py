@@ -12,6 +12,9 @@ import numpy as np
 
 import imageAnalysis
 import util
+import time
+
+number_of_frames = 0
 
 def processVideo(directory, interactive=False):
     print('Processing video...')
@@ -42,6 +45,9 @@ def processVideo(directory, interactive=False):
             break
 
         i += 1
+        
+    global number_of_frames
+    number_of_frames = i
 
     print('\n\n' + ('=' * 30) + '\n')
     cap.release()
@@ -57,6 +63,9 @@ def saveVideo(directory):
     clip.write_videofile(util.OUTPUT_PATH + directory + '.mp4')
 
 if __name__ == '__main__':
+    # Calculate the start time
+    start = time.time()
+    
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-d', '--directory', help='image directory id',
         default='00')
@@ -70,4 +79,16 @@ if __name__ == '__main__':
     os.makedirs(util.FRAMES_PATH, exist_ok=True)
 
     processVideo(args.directory)
+    frame_end = time.time()
+    
     saveVideo(args.directory)
+    # Calculate the end time and time taken
+    program_end = time.time()
+
+    # Show the results : this can be altered however you like
+    print()
+    print(('=' * 30))
+    print()
+    print("Accuracy:", "??")
+    print("Program time:", int(program_end - start), "seconds")
+    print("Frame processing speed: " + str(int(number_of_frames / (frame_end - start) * 60)) + "/minute")
