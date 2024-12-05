@@ -2,10 +2,10 @@ from ultralytics import YOLO
 import cv2
 
 # Load trained YOLO model
-model = YOLO('runs/train/exp/weights/best.pt')  # Path to your trained weights
+model = YOLO('runs/detect/train16/weights/best.pt')  # Path to your trained weights
 
 # Load image or video
-input_path = 'test_image.jpg'  # Change to your test video path if needed
+input_path = 'input/videos/OTV1/mario.mp4'  # Change to your test video path if needed
 image = cv2.imread(input_path)
 
 # Perform inference
