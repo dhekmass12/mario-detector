@@ -1,0 +1,41 @@
+{
+  "images": [
+    {
+      "width": 275,
+      "height": 362,
+      "id": 0,
+      "file_name": "mario.png"
+    }
+  ],
+  "categories": [
+    {
+      "id": 0,
+      "name": "Mario"
+    }
+  ],
+  "annotations": [
+    {
+      "id": 0,
+      "image_id": 0,
+      "category_id": 0,
+      "segmentation": [],
+      "bbox": [
+        3.0000000000000004,
+        1.9999999999999998,
+        272.0,
+        360.0
+      ],
+      "ignore": 0,
+      "iscrowd": 0,
+      "area": 97920.0
+    }
+  ],
+  "info": {
+    "year": 2024,
+    "version": "1.0",
+    "description": "",
+    "contributor": "Label Studio",
+    "url": "",
+    "date_created": "2024-12-04 14:25:48.763460"
+  }
+}
