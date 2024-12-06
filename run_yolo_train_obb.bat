@@ -1,0 +1,1 @@
+yolo train data=data-limited-obb.yaml model=yolo11s-obb.pt batch=8 imgsz=640 dropout=0.4 box=6.9

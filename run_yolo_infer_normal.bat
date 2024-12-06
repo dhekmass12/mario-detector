@@ -1,0 +1,1 @@
+yolo predict model=runs/detect/train6/weights/best.pt source="Test video (open)/OTV1".mp4 save=True conf=0.69 iou=0.12

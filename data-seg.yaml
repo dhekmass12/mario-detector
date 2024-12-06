@@ -1,0 +1,5 @@
+train: ./dataset/images/train
+val: ./dataset/images/val
+
+nc: 1  # Two classes: Mario and background
+names: ['Mario']

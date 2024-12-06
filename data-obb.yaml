@@ -1,0 +1,5 @@
+train: ./dataset_obb/images/train
+val: ./dataset_obb/images/val
+
+nc: 1  # Number of classes
+names: ['Mario']

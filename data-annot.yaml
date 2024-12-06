@@ -1,0 +1,5 @@
+train: ./manual_annot/images/train
+val: ./manual_annot/images/val
+
+nc: 1  # Number of classes
+names: ['Mario']

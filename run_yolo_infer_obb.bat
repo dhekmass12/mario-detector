@@ -1,0 +1,1 @@
+yolo predict model=runs/obb/train26/weights/best.pt source="Test video (open)/OTV5".mp4 save=True conf=0.5 iou=0.3 imgsz=640

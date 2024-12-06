@@ -1,0 +1,1 @@
+yolo obb val model=runs/obb/train6/weights/best.pt data=data-obb.yaml
