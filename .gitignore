@@ -8,3 +8,4 @@ point_maps/
 notes.md
 *.cache
 runs
+*.pt
