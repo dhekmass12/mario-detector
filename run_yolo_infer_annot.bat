@@ -1,1 +1,1 @@
-yolo obb predict model=runs/obb/train28/weights/best.pt source="Test video (open)/OTV5".mp4 save=True
+yolo obb predict model=runs/obb/train6/weights/best.pt source="Test video (hidden)/HTV".mp4 save=True conf=0.4 iou=0.3

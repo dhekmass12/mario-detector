@@ -1,1 +1,1 @@
-yolo obb train data=data-annot.yaml model=yolo11s-obb.pt batch=16 box=6.9 imgsz=640 dropout=0.2
+yolo obb train data=data-annot.yaml model=yolo11s-obb.pt batch=2 box=6.9 imgsz=640 dropout=0.2 epochs=25

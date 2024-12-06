@@ -6,10 +6,10 @@ import os
 
 # Paths
 image_path = './mario_limited/images/mario.png'  # Path to the original image
-train_images_path = './mario_limited_obb/images/train'
-train_labels_path = './mario_limited_obb/labels/train'
-val_images_path = './mario_limited_obb/images/val'
-val_labels_path = './mario_limited_obb/labels/val'
+train_images_path = './mario_limited_obb_white/images/train'
+train_labels_path = './mario_limited_obb_white/labels/train'
+val_images_path = './mario_limited_obb_white/images/val'
+val_labels_path = './mario_limited_obb_white/labels/val'
 
 # Create directories
 os.makedirs(train_images_path, exist_ok=True)
@@ -17,9 +17,29 @@ os.makedirs(val_images_path, exist_ok=True)
 os.makedirs(train_labels_path, exist_ok=True)
 os.makedirs(val_labels_path, exist_ok=True)
 
+def replace_transparent_with_white(image):
+    """
+    Replaces the transparent background in an RGBA image with a white background.
+    :param image: Input image with an alpha channel (RGBA).
+    :return: Image with transparency replaced by white (RGB).
+    """
+    if image.shape[-1] == 4:  # Check if the image has an alpha channel
+        # Split the image into RGB and Alpha
+        rgb_image = image[:, :, :3]
+        alpha_channel = image[:, :, 3] / 255.0  # Normalize alpha to [0, 1]
+
+        # Create a white background
+        white_background = np.ones_like(rgb_image, dtype=np.uint8) * 255
+
+        # Blend the image with the white background using the alpha channel
+        blended_image = (rgb_image * alpha_channel[:, :, None] + 
+                         white_background * (1 - alpha_channel[:, :, None]))
+        return blended_image.astype(np.uint8)  # Ensure image is uint8
+    return image  # If no alpha channel, return the original image
+
 # Load the original image
 image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)  # Includes alpha channel if present
-height, width = image.shape[:2]
+image = replace_transparent_with_white(image)  # Replace transparency with white
 
 # Read the OBB annotation for Mario (YOLO OBB format: class_id x1 y1 x2 y2 x3 y3 x4 y4)
 obb_label_content = "0 0.012108469716879703 0.01182654402102497 0.9600286704097477 0.01182654402102497 0.9600286704097477 0.9724047306176086 0.012108469716879703 0.9724047306176086"
@@ -110,10 +130,15 @@ def mario_to_grayscale(image, probability=0.5):
 
 def place_multiple_marios(image, box_points, num_instances_range=(3, 6), probability=0.5):
     """
-    Places random Mario instances into the image with a probability, preserving transparency.
+    Places multiple Mario instances into the image on a white background.
+    :param image: Input RGB image with a white background.
+    :param box_points: Bounding box points (denormalized).
+    :param num_instances_range: Range of the number of Mario instances to add.
+    :param probability: Probability of adding multiple Marios.
+    :return: Image with multiple Mario instances.
     """
     if np.random.rand() < probability:
-        num_instances = np.random.randint(*num_instances_range)
+        num_instances = np.random.randint(*num_instances_range)  # Randomize number of instances
         image_height, image_width = image.shape[:2]
 
         # Denormalize box_points to pixel values
@@ -122,39 +147,63 @@ def place_multiple_marios(image, box_points, num_instances_range=(3, 6), probabi
         box_points[:, 1] *= image_height
         box_points = np.round(box_points).astype(int)
 
+        # Crop the original Mario cutout
+        mario_cutout = image[box_points[0][1]:box_points[2][1], box_points[0][0]:box_points[2][0]]
+
         for _ in range(num_instances):
             # Randomly position Mario in the image
-            x_offset = np.random.randint(0, image_width - (box_points[2][0] - box_points[0][0]))
-            y_offset = np.random.randint(0, image_height - (box_points[2][1] - box_points[0][1]))
+            x_offset = np.random.randint(0, image_width - mario_cutout.shape[1])
+            y_offset = np.random.randint(0, image_height - mario_cutout.shape[0])
 
-            # Crop Mario object including alpha channel
-            mario_cutout = image[box_points[0][1]:box_points[2][1], box_points[0][0]:box_points[2][0]]
-
-            # Overlay Mario with transparency
-            overlay(image, mario_cutout, x_offset, y_offset)
+            # Overlay Mario at the random position
+            image[y_offset:y_offset + mario_cutout.shape[0], x_offset:x_offset + mario_cutout.shape[1]] = mario_cutout
 
     return image
 
-def overlay(background, overlay, x, y):
-    """
-    Overlays an RGBA image onto a background image at position (x, y).
-    """
-    bh, bw = background.shape[:2]
-    oh, ow = overlay.shape[:2]
 
-    # Ensure overlay doesn't go out of bounds
-    x_end = min(x + ow, bw)
-    y_end = min(y + oh, bh)
-    overlay = overlay[:y_end - y, :x_end - x]
+# def clear_original_area(image, box_points):
+#     """
+#     Clears the original area where Mario was, making it fully transparent.
+#     :param image: Input RGBA image.
+#     :param box_points: Bounding box points (denormalized).
+#     :return: Image with cleared original area.
+#     """
+#     box_points = np.array(box_points, dtype=int)  # Ensure integer coordinates
+#     x_min, y_min = np.min(box_points[:, 0]), np.min(box_points[:, 1])
+#     x_max, y_max = np.max(box_points[:, 0]), np.max(box_points[:, 1])
 
-    # Extract alpha mask and inverse
-    alpha = overlay[:, :, 3] / 255.0
-    alpha_inv = 1.0 - alpha
+#     # Set the alpha channel of the specified area to 0 (fully transparent)
+#     image[y_min:y_max, x_min:x_max, 3] = 0
+#     return image
 
-    for c in range(3):  # Loop through RGB channels
-        background[y:y_end, x:x_end, c] = (
-            alpha * overlay[:, :, c] + alpha_inv * background[y:y_end, x:x_end, c]
-        )
+
+# def overlay_with_transparency(background, overlay, x, y):
+#     """
+#     Overlays an RGBA image onto a background image at position (x, y),
+#     preserving transparency.
+#     """
+#     bh, bw = background.shape[:2]
+#     oh, ow = overlay.shape[:2]
+
+#     # Ensure the overlay fits within the background dimensions
+#     x_end = min(x + ow, bw)
+#     y_end = min(y + oh, bh)
+#     overlay = overlay[:y_end - y, :x_end - x]
+
+#     # Extract the alpha mask
+#     alpha = overlay[:, :, 3] / 255.0  # Normalize alpha to [0, 1]
+#     alpha_inv = 1.0 - alpha
+
+#     for c in range(3):  # Blend each RGB channel
+#         background[y:y_end, x:x_end, c] = (
+#             alpha * overlay[:, :, c] + alpha_inv * background[y:y_end, x:x_end, c]
+#         )
+
+#     # Update the alpha channel in the background
+#     background[y:y_end, x:x_end, 3] = (
+#         alpha * 255 + alpha_inv * background[y:y_end, x:x_end, 3]
+#     )
+#     return background
 
 # Function to apply pixelation randomly with probability
 def pixelate(image, pixel_size_range=(5, 15), probability=0.5):
@@ -184,47 +233,33 @@ def ensure_alpha_channel(image):
     return image
 
 # Generate augmented training data
-for i in range(100):
+for i in range(20):
 
-    augmented_image = place_multiple_marios(image.copy(), annotation["box_points"], num_instances_range=(3, 6), probability=0.2)
-
-    # Split RGB and Alpha for Albumentations
-    rgb_image = image[:, :, :3]
-    alpha_channel = image[:, :, 3]
+    augmented_image = place_multiple_marios(image.copy(), annotation["box_points"], num_instances_range=(3, 6), probability=0.3)
 
     # Apply Albumentations on RGB
-    augmented_train = train_augmentations(image=rgb_image)
-    augmented_rgb = augmented_train["image"]
-
-    # Step 5: Recombine RGB with the original alpha channel
-    augmented_train = cv2.merge((augmented_rgb, alpha_channel))
+    augmented_train = train_augmentations(image=augmented_image)
+    augmented_image = augmented_train["image"]
 
     # Apply grayscale transformation
-    augmented_image = mario_to_grayscale(augmented_train, probability=0.1)  # 10% chance of grayscale
-    augmented_image = pixelate(augmented_image, pixel_size_range=(5, 15), probability=0.05)
+    augmented_image = mario_to_grayscale(augmented_image, probability=0.2)  # 10% chance of grayscale
+    augmented_image = pixelate(augmented_image, pixel_size_range=(5, 15), probability=0.1)
 
     save_augmented_data({"image": augmented_image}, f"mario_train_aug_{i}.png", train_images_path, train_labels_path, [annotation])
 
 image = ensure_alpha_channel(image)  # Ensure transparency
 
 # Generate augmented validation data
-for i in range(100):
+for i in range(20):
 
-    augmented_image = place_multiple_marios(image.copy(), annotation["box_points"], num_instances_range=(3, 6), probability=0.2)
-
-    # Split RGB and Alpha for Albumentations
-    rgb_image = image[:, :, :3]
-    alpha_channel = image[:, :, 3]
+    augmented_image = place_multiple_marios(image.copy(), annotation["box_points"], num_instances_range=(3, 6), probability=0.3)
 
     # Apply Albumentations on RGB
-    augmented_val = val_augmentations(image=rgb_image)
-    augmented_rgb = augmented_val["image"]
-
-    # Step 5: Recombine RGB with the original alpha channel
-    augmented_val = cv2.merge((augmented_rgb, alpha_channel))
+    augmented_val = val_augmentations(image=augmented_image)
+    augmented_image = augmented_val["image"]
 
     # Apply grayscale transformation
-    augmented_image = mario_to_grayscale(augmented_val, probability=0.1)
-    augmented_image = pixelate(augmented_image, pixel_size_range=(5, 15), probability=0.05)
+    augmented_image = mario_to_grayscale(augmented_image, probability=0.2)
+    augmented_image = pixelate(augmented_image, pixel_size_range=(5, 15), probability=0.1)
 
     save_augmented_data({"image": augmented_image}, f"mario_val_aug_{i}.png", val_images_path, val_labels_path, [annotation])
